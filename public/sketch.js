@@ -79,8 +79,8 @@ function onConnect() {
 
 function joinedRoom(obj) {
     if (socket.id) {
-        console.log(socket.id + " Connected to " + obj.room);
-        logger("Connecte as " + socket.id)
+        //console.log();
+        logger(socket.id + " Connected to " + obj.room)
     }
 }
 

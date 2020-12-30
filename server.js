@@ -40,9 +40,9 @@ io.on('connection', function (socket) {
     //when a client performs an action...
     socket.on('clientAction', function (obj) {
         userData[obj.id].lastAction = Date.now();
-        console.log(obj.id + ":" + userData[obj.id]);
+        console.log(obj.id + ":" + userData[obj.id].room);
         //I log it on the console
-        console.log("A client pressed at " + obj.x + "," + obj.y);
+        console.log("   pressed at " + obj.x + "," + obj.y);
 
         //and send it to all clients
         io.emit('action', obj);
