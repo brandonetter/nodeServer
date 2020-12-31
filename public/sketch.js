@@ -50,12 +50,12 @@ function mousePressed() {
     //make sure the connection is established
     if (socket.id) {
 
-        console.log("Mouse pressed at " + mouseX + " " + mouseY);
-        //send 
+    //send 
         socket.emit('clientAction', {
             x: mouseX,
             y: mouseY,
             id: socket.id
+         
         });
 
     }
@@ -72,22 +72,22 @@ function onAction(obj) {
 //connected to the server
 function onConnect() {
     if (socket.id) {
-        console.log("Connected to the server");
+       
         logger("Connecte as " + socket.id)
     }
 }
 
 function joinedRoom(obj) {
     if (socket.id) {
-        //console.log();
-        logger(socket.id + " Connected to " + obj.room)
+        
+        //logger(socket.id + " Connected to " + obj.room)
     }
 }
 
 //a message from the server
 function onMessage(msg) {
     if (socket.id) {
-        logger("connected to room: " + msg.room);
-        console.log("Message from server: " + msg);
+        //logger(msg);
+    
     }
 }

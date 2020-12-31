@@ -13,6 +13,7 @@ socket.broadcast.emit('message', "this is a test");
 */
 
 //create a web application that uses the express frameworks and socket.io to communicate via http (the web protocol)
+const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
 var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
@@ -39,13 +40,31 @@ io.on('connection', function (socket) {
 
     //when a client performs an action...
     socket.on('clientAction', function (obj) {
-        userData[obj.id].lastAction = Date.now();
-        console.log(obj.id + ":" + userData[obj.id].room);
-        //I log it on the console
-        console.log("   pressed at " + obj.x + "," + obj.y);
+        var roomShared = [];
+        var clientsRoom = userData[obj.id].room;
 
+        for (const [key, value] of Object.entries(userData)) {
+            //console.log(`${key}:` + value.room);
+            if(obj.id != key){
+            if(value.room == clientsRoom){
+                roomShared.push(key);
+                console.log(`   ${key} is also in room`);
+            }
+        }
+          }
+        for(i=0;i<roomShared.length;i++){
+           // io.clients[roomShared[i]].send("hey!");
+            io.to(roomShared[i]).emit('action',obj);
+            io.to(socket.id).emit('action',obj);
+        } 
+        io.to(socket.id).emit('action',obj);
+        userData[obj.id].lastAction = Date.now();
+        //I log it on the console
+        
+        //io.clients[obj.id].send()
         //and send it to all clients
-        io.emit('action', obj);
+        //io.emit('action', obj);
+        //io.emit()
 
         //sending to all clients except sender
         socket.broadcast.emit("message", "It wasn't you!");
