@@ -1,0 +1,13 @@
+#console{
+    font-size: 9px;
+   
+    height: 200px;
+    border:1px;
+    border-color:aqua;
+   
+}
+
+#c{
+    width:400px;
+    height:400px;
+}

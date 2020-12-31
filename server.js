@@ -14,6 +14,7 @@ socket.broadcast.emit('message', "this is a test");
 
 //create a web application that uses the express frameworks and socket.io to communicate via http (the web protocol)
 const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
+const { Socket } = require('dgram');
 var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
@@ -32,19 +33,23 @@ io.on('connection', function (socket) {
         lastAction: Date.now(),
         room: 'landing',
         x: 0,
-        y: 0
+        y: 0,
+        name: null,
+        pin: null,
+        color: 'EEEEEE',
+        loggedIn : false
     }
 
     //this is sent to the client upon connection
     socket.emit('message', userData[socket.id]);
-
+    
     //when a client performs an action...
     socket.on('clientAction', function (obj) {
         var roomShared = [];
         var clientsRoom = userData[obj.id].room;
 
         for (const [key, value] of Object.entries(userData)) {
-            //console.log(`${key}:` + value.room);
+   
             if(obj.id != key){
             if(value.room == clientsRoom){
                 roomShared.push(key);
@@ -53,35 +58,74 @@ io.on('connection', function (socket) {
         }
           }
         for(i=0;i<roomShared.length;i++){
-           // io.clients[roomShared[i]].send("hey!");
+      
             io.to(roomShared[i]).emit('action',obj);
             io.to(socket.id).emit('action',obj);
         } 
         io.to(socket.id).emit('action',obj);
         userData[obj.id].lastAction = Date.now();
-        //I log it on the console
-        
-        //io.clients[obj.id].send()
-        //and send it to all clients
-        //io.emit('action', obj);
-        //io.emit()
-
+  
         //sending to all clients except sender
         socket.broadcast.emit("message", "It wasn't you!");
 
     });
 
+    socket.on('getUserInfo', function (obj) {
+        var roomShared = [];
+        var clientsRoom = userData[obj.id].room;
+        var sharedUser = false;
+        for (const [key, value] of Object.entries(userData)) {
+    
+            if(obj.userName == value.name){
+                if(obj.pin != value.pin){
+                    sharedUser = true;
+           
+                    obj.response = "USERNAME EXISTS ALREADY! BAD BOY";
+                }else{
+                    delete userData[key];
+                }
+            }
+          }
+        if(!sharedUser){
+            userData[obj.id].name = obj.userName;
+            userData[obj.id].pin = obj.pin;
+            userData[obj.id].lastAction = Date.now();
+            userData[obj.id].color = Math.floor(13000000 + Math.random() * 3777215).toString(16);
+            userData[obj.id].loggedIn = true;
+            obj = userData[obj.id];
+            obj.good = true;
+            obj.response = `YOU'VE CONNECTED TO ${obj.room} AS ${obj.name}`;
+        }
+      
+        
+        io.to(socket.id).emit('userInfo',obj);
+        
+    });
+
+
+    //Just a debug server Command
+    //probably wanna remove this in
+    //production
     socket.on('listUsers', function (obj) {
-        for (i = 0; i < users.length; i++) {
-            console.log(users[i] + ": ");
-            //var json = JSON.parse(userData[users[i]]);
-            console.log(userData[users[i]]);
+        console.log("======--   USER LIST START   --======");
+        for (const [key, value] of Object.entries(userData)) {
+            console.log(`   `+value.name + " ::: "+key);
+            console.log(`       ${value.x},${value.y}`);
+            console.log(`       color: ${value.color}`);
+            console.log(`       room : ${value.room}`);
+            if(value.loggedIn){
+                console.log(`       LOGGED IN`);
+            }
+            
+            
+            
 
-            var millis = Date.now() - userData[users[i]].lastAction;
+            var millis = Date.now() - value.lastAction;
 
-            console.log(`idle time = ${Math.floor(millis / 1000)}`);
+            console.log(`           idle time = ${Math.floor(millis / 1000)}`);
 
         }
+        console.log("======--   -=-=-=-=-=-=-=-=-   --======");
 
 
 

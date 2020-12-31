@@ -1,11 +1,8 @@
-//check README.md for more information
-
-/// <reference path="TSDef/p5.global-mode.d.ts" />
 
 //create a socket connection
 var socket;
 
-function boop() {
+function listUsers() {
     socket.emit('listUsers');
 }
 
@@ -16,10 +13,7 @@ function joinRoom() {
 }
 
 function setup() {
-    //create a canvas
-    createCanvas(800, 600);
-    //paint it white
-    background(255, 255, 255);
+  
 
     //I create socket but I wait to assign all the functions before opening a connection
     socket = io({
@@ -33,13 +27,10 @@ function setup() {
     //handles the user action broadcast by the server, the parameter is an object
     socket.on('action', onAction);
     socket.on('server-joinRoom', joinedRoom);
+    socket.on('userInfo', gotUserInfo);
     socket.open();
 }
 
-//this function is called continuously
-function draw() {
-
-}
 
 function logger(note) {
     document.getElementById('log').innerHTML += "<br>" + note;
@@ -72,11 +63,43 @@ function onAction(obj) {
 //connected to the server
 function onConnect() {
     if (socket.id) {
-       
-        logger("Connecte as " + socket.id)
+        userID = document.getElementById('username').value;
+        userPin = document.getElementById('pin').value;
+            
+            userColor = Math.floor(13000000 + Math.random() * 3777215).toString(16);
+            document.getElementById('userColor').style.backgroundColor = '#' + userColor;
+            document.getElementById('userColor').innerHTML = userID;
+            logger("Connected "+socket.id);
+            document.getElementById('loginForm').hidden = true;
+            document.getElementById('controls').hidden = false;
+            
+            getUserInfo();
+        
     }
+   
 }
 
+function getUserInfo(){
+    if (socket.id) {
+
+            socket.emit('getUserInfo', {
+                id: socket.id,
+                userName: userID,
+                pin: userPin
+            });
+    
+        }
+}
+function gotUserInfo(obj) {
+    logger(obj.response);
+    if (socket.id && obj.good) {
+        //ogger(obj.response);
+        x = obj.x;
+        y = obj.y;
+        color = obj.color;
+        room = obj.room;
+    }
+}
 function joinedRoom(obj) {
     if (socket.id) {
         
