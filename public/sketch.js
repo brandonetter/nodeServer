@@ -1,4 +1,3 @@
-
 //create a socket connection
 var socket;
 
@@ -13,10 +12,11 @@ function joinRoom() {
 }
 
 function setup() {
-  
+
 
     //I create socket but I wait to assign all the functions before opening a connection
     socket = io({
+
         autoConnect: false
     });
 
@@ -29,8 +29,8 @@ function setup() {
     socket.on('server-joinRoom', joinedRoom);
     socket.on('userInfo', gotUserInfo);
     socket.on('server-playerMove', serverPlayerMove)
-    if(!socket.id)
-    socket.open();
+    if (!socket.id)
+        socket.open();
 }
 
 
@@ -43,28 +43,29 @@ function mousePressed() {
     //make sure the connection is established
     if (socket.id) {
 
-    //send 
+        //send 
         socket.emit('clientAction', {
             x: mouseX,
             y: mouseY,
             id: socket.id
-         
+
         });
 
     }
 }
-function sketchSendUserInput(keys){
+
+function sketchSendUserInput(keys) {
     if (socket.id) {
 
         //send 
-            socket.emit('clientAction', {
-                id: socket.id,
-                input:keys,
-                action:'input'
-             
-            });
-    
-        }
+        socket.emit('clientAction', {
+            id: socket.id,
+            input: keys,
+            action: 'input'
+
+        });
+
+    }
 }
 //called by the server upon any user action including me
 function onAction(obj) {
@@ -73,52 +74,56 @@ function onAction(obj) {
     //draw a circle
     ellipse(obj.x, obj.y, 20, 20);
 }
-function serverPlayerMove(obj){
-    fabricGameDraw(obj.x,obj.y,obj.userName);
+
+function serverPlayerMove(obj) {
+    fabricGameDraw(obj.x, obj.y, obj.userName);
 }
 //connected to the server
 function onConnect() {
     if (socket.id && false) {
         userID = document.getElementById('username').value;
         userPin = document.getElementById('pin').value;
-            
-            userColor = Math.floor(13000000 + Math.random() * 3777215).toString(16);
-            document.getElementById('userColor').style.backgroundColor = '#' + userColor;
-            document.getElementById('userColor').innerHTML = userID;
-            logger("Connected "+socket.id);
 
-            
-            getUserInfo();
-        
+        userColor = Math.floor(13000000 + Math.random() * 3777215).toString(16);
+        document.getElementById('userColor').style.backgroundColor = '#' + userColor;
+        document.getElementById('userColor').innerHTML = userID;
+        logger("Connected " + socket.id);
+
+
+        getUserInfo();
+
     }
-   
+
 }
-function login(){
+
+function login() {
     if (socket.id) {
         userID = document.getElementById('username').value;
         userPin = document.getElementById('pin').value;
-            
-            userColor = Math.floor(13000000 + Math.random() * 3777215).toString(16);
-            document.getElementById('userColor').style.backgroundColor = '#' + userColor;
-            document.getElementById('userColor').innerHTML = userID;
-            logger("Connected "+socket.id);
 
-            
-            getUserInfo();
-        
+        userColor = Math.floor(13000000 + Math.random() * 3777215).toString(16);
+        document.getElementById('userColor').style.backgroundColor = '#' + userColor;
+        document.getElementById('userColor').innerHTML = userID;
+        logger("Connected " + socket.id);
+
+
+        getUserInfo();
+
     }
 }
-function getUserInfo(){
+
+function getUserInfo() {
     if (socket.id) {
 
-            socket.emit('getUserInfo', {
-                id: socket.id,
-                userName: userID,
-                pin: userPin
-            });
-    
-        }
+        socket.emit('getUserInfo', {
+            id: socket.id,
+            userName: userID,
+            pin: userPin
+        });
+
+    }
 }
+
 function gotUserInfo(obj) {
     logger(obj.response);
     if (socket.id && obj.good) {
@@ -131,15 +136,16 @@ function gotUserInfo(obj) {
         document.getElementById('controls').hidden = false;
     }
 }
+
 function joinedRoom(obj) {
     if (socket.id) {
-        
+
         //logger(socket.id + " Connected to " + obj.room)
     }
 }
 
-function sketchSendMove(obj){
-    if(socket.id){
+function sketchSendMove(obj) {
+    if (socket.id) {
         socket.emit('clientAction', {
             id: socket.id,
             userName: userID,
@@ -156,6 +162,6 @@ function sketchSendMove(obj){
 function onMessage(msg) {
     if (socket.id) {
         //logger(msg);
-    
+
     }
 }

@@ -13,8 +13,12 @@ socket.broadcast.emit('message', "this is a test");
 */
 
 //create a web application that uses the express frameworks and socket.io to communicate via http (the web protocol)
-const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
-const { Socket } = require('dgram');
+const {
+    SSL_OP_SSLEAY_080_CLIENT_DH_BUG
+} = require('constants');
+const {
+    Socket
+} = require('dgram');
 var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
@@ -37,53 +41,53 @@ io.on('connection', function (socket) {
         name: null,
         pin: null,
         color: 'EEEEEE',
-        loggedIn : false
+        loggedIn: false
     }
 
     //this is sent to the client upon connection
     socket.emit('message', userData[socket.id]);
-    
+
     //when a client performs an action...
     socket.on('clientAction', function (obj) {
         var roomShared = [];
         var clientsRoom = userData[obj.id].room;
 
         for (const [key, value] of Object.entries(userData)) {
-   
-            if(obj.id != key){
-            if(value.room == clientsRoom){
-                roomShared.push(key);
-                //console.log(`   ${key} is also in room`);
+
+            if (obj.id != key) {
+                if (value.room == clientsRoom) {
+                    roomShared.push(key);
+                    //console.log(`   ${key} is also in room`);
+                }
             }
         }
-          }
-        for(i=0;i<roomShared.length;i++){
-            if(obj.action == "move"){
-                io.to(roomShared[i]).emit('server-playerMove',{
+        for (i = 0; i < roomShared.length; i++) {
+            if (obj.action == "move") {
+                io.to(roomShared[i]).emit('server-playerMove', {
                     userName: obj.userName,
                     x: obj.x,
                     y: obj.y
                 });
-                
+
             }
-            if(obj.action == "input"){
-                io.to(roomShared[i]).emit('server-playerMove',{
+            if (obj.action == "input") {
+                io.to(roomShared[i]).emit('server-playerMove', {
                     userName: obj.userName,
                     x: obj.x,
                     y: obj.y
                 });
-                
+
             }
-            
-        } 
-        io.to(socket.id).emit('server-playerMove',{
+
+        }
+        io.to(socket.id).emit('server-playerMove', {
             userName: obj.userName,
             x: obj.x,
             y: obj.y
         });
 
         userData[obj.id].lastAction = Date.now();
-  
+
         //sending to all clients except sender
         //socket.broadcast.emit("message", "It wasn't you!");
 
@@ -94,18 +98,18 @@ io.on('connection', function (socket) {
         var clientsRoom = userData[obj.id].room;
         var sharedUser = false;
         for (const [key, value] of Object.entries(userData)) {
-    
-            if(obj.userName == value.name){
-                if(obj.pin != value.pin){
+
+            if (obj.userName == value.name) {
+                if (obj.pin != value.pin) {
                     sharedUser = true;
-           
+
                     obj.response = "USERNAME EXISTS ALREADY! BAD BOY";
-                }else{
+                } else {
                     delete userData[key];
                 }
             }
-          }
-        if(!sharedUser){
+        }
+        if (!sharedUser) {
             userData[obj.id].name = obj.userName;
             userData[obj.id].pin = obj.pin;
             userData[obj.id].lastAction = Date.now();
@@ -115,10 +119,10 @@ io.on('connection', function (socket) {
             obj.good = true;
             obj.response = `YOU'VE CONNECTED TO ${obj.room} AS ${obj.name}`;
         }
-      
-        
-        io.to(socket.id).emit('userInfo',obj);
-        
+
+
+        io.to(socket.id).emit('userInfo', obj);
+
     });
 
 
@@ -128,16 +132,16 @@ io.on('connection', function (socket) {
     socket.on('listUsers', function (obj) {
         console.log("======--   USER LIST START   --======");
         for (const [key, value] of Object.entries(userData)) {
-            console.log(`   `+value.name + " ::: "+key);
+            console.log(`   ` + value.name + " ::: " + key);
             console.log(`       ${value.x},${value.y}`);
             console.log(`       color: ${value.color}`);
             console.log(`       room : ${value.room}`);
-            if(value.loggedIn){
+            if (value.loggedIn) {
                 console.log(`       LOGGED IN`);
             }
-            
-            
-            
+
+
+
 
             var millis = Date.now() - value.lastAction;
 
