@@ -53,20 +53,39 @@ io.on('connection', function (socket) {
             if(obj.id != key){
             if(value.room == clientsRoom){
                 roomShared.push(key);
-                console.log(`   ${key} is also in room`);
+                //console.log(`   ${key} is also in room`);
             }
         }
           }
         for(i=0;i<roomShared.length;i++){
-      
-            io.to(roomShared[i]).emit('action',obj);
-            io.to(socket.id).emit('action',obj);
+            if(obj.action == "move"){
+                io.to(roomShared[i]).emit('server-playerMove',{
+                    userName: obj.userName,
+                    x: obj.x,
+                    y: obj.y
+                });
+                
+            }
+            if(obj.action == "input"){
+                io.to(roomShared[i]).emit('server-playerMove',{
+                    userName: obj.userName,
+                    x: obj.x,
+                    y: obj.y
+                });
+                
+            }
+            
         } 
-        io.to(socket.id).emit('action',obj);
+        io.to(socket.id).emit('server-playerMove',{
+            userName: obj.userName,
+            x: obj.x,
+            y: obj.y
+        });
+
         userData[obj.id].lastAction = Date.now();
   
         //sending to all clients except sender
-        socket.broadcast.emit("message", "It wasn't you!");
+        //socket.broadcast.emit("message", "It wasn't you!");
 
     });
 
@@ -137,6 +156,12 @@ io.on('connection', function (socket) {
             io.emit('server-joinRoom', userData[obj.id]);
 
         }
+
+
+    });
+
+    socket.on('userMove', function (obj) {
+        console.log(obj.x)
 
 
     });

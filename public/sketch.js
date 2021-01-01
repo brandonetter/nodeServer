@@ -28,6 +28,8 @@ function setup() {
     socket.on('action', onAction);
     socket.on('server-joinRoom', joinedRoom);
     socket.on('userInfo', gotUserInfo);
+    socket.on('server-playerMove', serverPlayerMove)
+    if(!socket.id)
     socket.open();
 }
 
@@ -51,7 +53,19 @@ function mousePressed() {
 
     }
 }
+function sketchSendUserInput(keys){
+    if (socket.id) {
 
+        //send 
+            socket.emit('clientAction', {
+                id: socket.id,
+                input:keys,
+                action:'input'
+             
+            });
+    
+        }
+}
 //called by the server upon any user action including me
 function onAction(obj) {
     //change fill color to black
@@ -59,9 +73,27 @@ function onAction(obj) {
     //draw a circle
     ellipse(obj.x, obj.y, 20, 20);
 }
-
+function serverPlayerMove(obj){
+    fabricGameDraw(obj.x,obj.y,obj.userName);
+}
 //connected to the server
 function onConnect() {
+    if (socket.id && false) {
+        userID = document.getElementById('username').value;
+        userPin = document.getElementById('pin').value;
+            
+            userColor = Math.floor(13000000 + Math.random() * 3777215).toString(16);
+            document.getElementById('userColor').style.backgroundColor = '#' + userColor;
+            document.getElementById('userColor').innerHTML = userID;
+            logger("Connected "+socket.id);
+
+            
+            getUserInfo();
+        
+    }
+   
+}
+function login(){
     if (socket.id) {
         userID = document.getElementById('username').value;
         userPin = document.getElementById('pin').value;
@@ -70,15 +102,12 @@ function onConnect() {
             document.getElementById('userColor').style.backgroundColor = '#' + userColor;
             document.getElementById('userColor').innerHTML = userID;
             logger("Connected "+socket.id);
-            document.getElementById('loginForm').hidden = true;
-            document.getElementById('controls').hidden = false;
+
             
             getUserInfo();
         
     }
-   
 }
-
 function getUserInfo(){
     if (socket.id) {
 
@@ -98,6 +127,8 @@ function gotUserInfo(obj) {
         y = obj.y;
         color = obj.color;
         room = obj.room;
+        document.getElementById('loginForm').hidden = true;
+        document.getElementById('controls').hidden = false;
     }
 }
 function joinedRoom(obj) {
@@ -105,6 +136,20 @@ function joinedRoom(obj) {
         
         //logger(socket.id + " Connected to " + obj.room)
     }
+}
+
+function sketchSendMove(obj){
+    if(socket.id){
+        socket.emit('clientAction', {
+            id: socket.id,
+            userName: userID,
+            pin: userPin,
+            x: obj.x,
+            y: obj.y,
+            action: "move"
+        });
+    }
+
 }
 
 //a message from the server

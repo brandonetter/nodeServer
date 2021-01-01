@@ -1,6 +1,6 @@
 <html>
 
-<Body>
+<Body onkeydown="keyDown(event,1)" onkeyup="keyDown(event,0)">
 
     <canvas id='c'></canvas>
 </Body>
@@ -12,15 +12,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.3.0/fabric.min.js"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js'></script>
     <script src='sketch.js'></script>
+    <script src='fabricGame.js'></script>
 
- <body>   
+ <body onload="setup()">   
      <div id='controls' hidden='true'>
          <button onclick='listUsers()'>Square</button>
     </div>
 <div id='loginForm'>
 <input type='text' value='username' id='username'/>
 <input type='text' size='4' value='PIN' id='pin'/>
-<button id='loginButton' onclick='setup()'>Login</button>
+<button id='loginButton' onclick='login()'>Login</button>
 </div>
 
 <div id='userColor'></div>
