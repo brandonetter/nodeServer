@@ -44,7 +44,7 @@ var canlog = false;
 setInterval(function () {
     canlog = !canlog;
     canvas.requestRenderAll();
-}, 480);
+}, 80);
 
 
 

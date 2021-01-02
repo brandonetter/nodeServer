@@ -41,7 +41,8 @@ io.on('connection', function (socket) {
         name: null,
         pin: null,
         color: 'EEEEEE',
-        loggedIn: false
+        loggedIn: false,
+        hasBody: false
     }
 
     //this is sent to the client upon connection
@@ -62,6 +63,15 @@ io.on('connection', function (socket) {
             }
         }
         for (i = 0; i < roomShared.length; i++) {
+            if (obj.action == "click") {
+                if (!userData[obj.id].hasBody) {
+                    io.to(roomShared[i]).emit('server-spawnFren', {
+                        userName: obj.userName,
+                        x: obj.x,
+                        y: obj.y
+                    });
+                }
+            }
             if (obj.action == "move") {
                 io.to(roomShared[i]).emit('server-playerMove', {
                     userName: obj.userName,
@@ -71,21 +81,55 @@ io.on('connection', function (socket) {
 
             }
             if (obj.action == "input") {
+                console.log(obj.input);
+                var keys = JSON.parse(obj.input);
+                if (keys.W) {
+                    userData[obj.id].y -= 2;
+                }
+                if (keys.A) {
+                    userData[obj.id].x -= 2;
+                }
+
+                if (keys.S) {
+                    userData[obj.id].y += 2;
+                }
+
+                if (keys.D) {
+                    userData[obj.id].x += 2;
+                }
+
+                obj.x = userData[obj.id].x;
+                obj.x = userData[obj.id].y;
+
+
+
                 io.to(roomShared[i]).emit('server-playerMove', {
-                    userName: obj.userName,
-                    x: obj.x,
-                    y: obj.y
+                    userName: userData[obj.id].name,
+                    x: userData[obj.id].x,
+                    y: userData[obj.id].y
+                });
+                io.to(socket.id).emit('server-playerMove', {
+                    userName: userData[obj.id].name,
+                    x: userData[obj.id].x,
+                    y: userData[obj.id].y
                 });
 
             }
 
         }
-        io.to(socket.id).emit('server-playerMove', {
-            userName: obj.userName,
-            x: obj.x,
-            y: obj.y
-        });
+        if (obj.action == "click") {
+            if (!userData[obj.id].hasBody) {
+                userData[obj.id].hasBody = true;
+                userData[obj.id].x = obj.x;
+                userData[obj.id].y = obj.y;
+                io.to(socket.id).emit('server-spawnFren', {
+                    userName: obj.userName,
+                    x: obj.x,
+                    y: obj.y
+                });
+            }
 
+        }
         userData[obj.id].lastAction = Date.now();
 
         //sending to all clients except sender

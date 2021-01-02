@@ -28,7 +28,9 @@ function setup() {
     socket.on('action', onAction);
     socket.on('server-joinRoom', joinedRoom);
     socket.on('userInfo', gotUserInfo);
-    socket.on('server-playerMove', serverPlayerMove)
+    socket.on('server-playerMove', serverPlayerMove);
+    socket.on('server-spawnFren', serverSpawnFren);
+    
     if (!socket.id)
         socket.open();
 }
@@ -47,20 +49,29 @@ function mousePressed() {
         socket.emit('clientAction', {
             x: mouseX,
             y: mouseY,
-            id: socket.id
+            id: socket.id,
+            action: 'click'
 
         });
 
     }
 }
 
-function sketchSendUserInput(keys) {
+function sketchSendUserInput() {
     if (socket.id) {
 
-        //send 
+        keysOut = '{"icu":1,';
+        Object.entries(keys).forEach(entry => {
+            const [key, value] = entry;
+            if(key=='W' ||key=='S'||key=='A'||key=='D')
+            keysOut += `"${key}":${value},`;
+            //console.log(key + ": " + keysOut['key']);
+        });
+        keysOut = keysOut.slice(0, -1);
+        keysOut += "}";
         socket.emit('clientAction', {
             id: socket.id,
-            input: keys,
+            input: keysOut,
             action: 'input'
 
         });
@@ -76,8 +87,14 @@ function onAction(obj) {
 }
 
 function serverPlayerMove(obj) {
+    fabricGameUpdatePos(obj);
+    //fabricGameDraw(obj.x, obj.y, obj.userName);
+}
+function serverSpawnFren(obj) {
+    console.log(obj.x);
     fabricGameDraw(obj.x, obj.y, obj.userName);
 }
+
 //connected to the server
 function onConnect() {
     if (socket.id && false) {
@@ -152,7 +169,7 @@ function sketchSendMove(obj) {
             pin: userPin,
             x: obj.x,
             y: obj.y,
-            action: "move"
+            action: "click"
         });
     }
 
